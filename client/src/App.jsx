@@ -1,7 +1,14 @@
 
+import Admin from "./Admin";
+import ContactForm from "./ContactForm";
 import "./index.css";
 
 function App() {
+  // Admin dashboard route
+  if (window.location.pathname === "/admin") {
+    return <Admin />;
+  }
+
   const skills = [
     "HTML", "CSS", "JavaScript", "React",
     "Node.js", "Express.js", "MongoDB",
@@ -113,6 +120,7 @@ function App() {
 
         <section className="section about" id="about">
           <p className="eyebrow">01 / ABOUT ME</p>
+
           <h2 className="section-title">
             Turning ideas into <span>digital reality.</span>
           </h2>
@@ -135,6 +143,7 @@ function App() {
 
         <section className="section" id="skills">
           <p className="eyebrow">02 / MY TOOLKIT</p>
+
           <h2 className="section-title">
             Skills & <span>Technologies.</span>
           </h2>
@@ -150,6 +159,7 @@ function App() {
 
         <section className="section" id="projects">
           <p className="eyebrow">03 / SELECTED WORK</p>
+
           <h2 className="section-title">
             Projects that <span>define me.</span>
           </h2>
@@ -169,6 +179,7 @@ function App() {
 
         <section className="section experience" id="experience">
           <p className="eyebrow">04 / EDUCATION</p>
+
           <h2 className="section-title">
             My learning <span>journey.</span>
           </h2>
@@ -185,19 +196,17 @@ function App() {
 
         <section className="section contact" id="contact">
           <p className="eyebrow">05 / GET IN TOUCH</p>
+
           <h2 className="section-title">
             Have a project in <span>mind?</span>
           </h2>
 
           <p>Let's connect and create something meaningful together.</p>
+
           <p className="email">sarikagautam1008@gmail.com</p>
 
-          <a
-            href="mailto:sarikagautam1008@gmail.com"
-            className="primary-btn"
-          >
-            Say Hello ↗
-          </a>
+          <ContactForm />
+
         </section>
       </main>
 
@@ -207,10 +216,19 @@ function App() {
         <p>Designed & Built by Sarika Gautam © 2026</p>
 
         <div className="footer-links">
-          <a href="https://github.com/Sarika-Gautam" target="_blank" rel="noreferrer">
+          <a
+            href="https://github.com/Sarika-Gautam"
+            target="_blank"
+            rel="noreferrer"
+          >
             GitHub ↗
           </a>
-          <a href="https://www.linkedin.com/in/sarika-gautam-744229320/" target="_blank" rel="noreferrer">
+
+          <a
+            href="https://www.linkedin.com/in/sarika-gautam-744229320/"
+            target="_blank"
+            rel="noreferrer"
+          >
             LinkedIn ↗
           </a>
         </div>
