@@ -12,10 +12,10 @@ const Admin = require("./models/Admin");
 
 const app = express();
 
-// Security middleware
+// 1. Security middleware
 app.use(helmet());
 
-// CORS configuration
+// 2. CORS configuration
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:5173",
@@ -23,10 +23,10 @@ app.use(
   })
 );
 
-// Parse JSON requests
+// 3. JSON body parser
 app.use(express.json({ limit: "10kb" }));
 
-// General API rate limiter
+// 4. General API rate limiter
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -38,19 +38,19 @@ const apiLimiter = rateLimit({
   }
 });
 
-// Login rate limiter
+// 5. Login rate limiter (Development testing)
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
+  windowMs: 1 * 60 * 1000,
+  max: 20,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
     success: false,
-    message: "Too many login attempts. Try again later."
+    message: "Too many login attempts. Please try again later."
   }
 });
 
-// Health check
+// 6. Health check route
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
@@ -58,14 +58,14 @@ app.get("/", (req, res) => {
   });
 });
 
-// API routes
+// 7. API routes
 app.use("/api/auth/login", loginLimiter);
 app.use("/api", apiLimiter);
 
 app.use("/api/contact", require("./routes/contactRoutes"));
 app.use("/api/auth", require("./routes/authRoutes"));
 
-// 404 handler
+// 8. 404 handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -73,7 +73,7 @@ app.use((req, res) => {
   });
 });
 
-// Error handler
+// 9. Global error handler
 app.use((err, req, res, next) => {
   console.error("Server Error:", err.message);
 
@@ -83,10 +83,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
+// 10. Start server
 const startServer = async () => {
   try {
-    // Check environment variables
     const requiredVariables = [
       "MONGO_URI",
       "JWT_SECRET",
@@ -100,8 +99,9 @@ const startServer = async () => {
     );
 
     if (missingVariables.length > 0) {
-      console.error("Missing environment variables:", missingVariables);
-      throw new Error("Please check your server/.env file");
+      throw new Error(
+        `Missing environment variables: ${missingVariables.join(", ")}`
+      );
     }
 
     if (process.env.JWT_SECRET.length < 32) {
@@ -112,13 +112,13 @@ const startServer = async () => {
       !process.env.MONGO_URI.startsWith("mongodb://") &&
       !process.env.MONGO_URI.startsWith("mongodb+srv://")
     ) {
-      throw new Error("MONGO_URI must be a valid MongoDB connection string");
+      throw new Error("Invalid MongoDB connection string");
     }
 
-    // Connect database
+    // Connect MongoDB
     await connectDB();
 
-    // Create initial admin if it does not exist
+    // Create admin if it does not exist
     const email = process.env.ADMIN_EMAIL.toLowerCase().trim();
 
     const existingAdmin = await Admin.findOne({ email });
@@ -139,7 +139,7 @@ const startServer = async () => {
       console.log("Admin account already exists");
     }
 
-    // Start listening
+    // Start Express server
     const PORT = process.env.PORT || 5000;
 
     app.listen(PORT, () => {
@@ -153,5 +153,3 @@ const startServer = async () => {
 };
 
 startServer();
-
-

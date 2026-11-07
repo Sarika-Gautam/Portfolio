@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import React, { useState } from "react";
 import { apiRequest } from "./api";
 
 function ContactForm() {
@@ -10,27 +11,50 @@ function ContactForm() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState("");
+  const [feedback, setFeedback] = useState({
+    type: "",
+    message: ""
+  });
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setStatus("");
+    setFeedback({ type: "", message: "" });
+
+    if (Object.values(form).some((value) => !value.trim())) {
+      setFeedback({
+        type: "error",
+        message: "Please fill in all fields."
+      });
+      return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(form.email)) {
+      setFeedback({
+        type: "error",
+        message: "Please enter a valid email address."
+      });
+      return;
+    }
 
     try {
-      const result = await apiRequest("/contact", {
+      setLoading(true);
+
+      const response = await apiRequest("/contact", {
         method: "POST",
         body: JSON.stringify(form)
       });
 
-      setStatus(result.message);
+      setFeedback({
+        type: "success",
+        message: response.message || "Message sent successfully!"
+      });
+
       setForm({
         name: "",
         email: "",
@@ -38,57 +62,65 @@ function ContactForm() {
         message: ""
       });
     } catch (error) {
-      setStatus(error.message);
+      setFeedback({
+        type: "error",
+        message: error.message || "Something went wrong."
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form className="contact-form" onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}>
       <input
+        type="text"
         name="name"
         placeholder="Your Name"
         value={form.name}
         onChange={handleChange}
         maxLength={80}
-        required
+        disabled={loading}
       />
 
       <input
-        name="email"
         type="email"
+        name="email"
         placeholder="Your Email"
         value={form.email}
         onChange={handleChange}
         maxLength={120}
-        required
+        disabled={loading}
       />
 
       <input
+        type="text"
         name="subject"
         placeholder="Subject"
         value={form.subject}
         onChange={handleChange}
         maxLength={150}
-        required
+        disabled={loading}
       />
 
       <textarea
         name="message"
-        placeholder="Your Message"
+        placeholder="Write your message..."
         value={form.message}
         onChange={handleChange}
         maxLength={2000}
-        required
-        rows={5}
+        disabled={loading}
       />
 
-      <button type="submit" disabled={loading}>
-        {loading ? "Sending..." : "Send Message"}
-      </button>
+      {feedback.message && (
+        <p role="status" className={`form-feedback ${feedback.type}`}>
+          {feedback.message}
+        </p>
+      )}
 
-      {status && <p role="status">{status}</p>}
+      <button type="submit" disabled={loading}>
+        {loading ? "Sending..." : "Send Message →"}
+      </button>
     </form>
   );
 }
